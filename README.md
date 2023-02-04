@@ -1,24 +1,41 @@
-# Foundry template
+# Universal bridge
 
-This is a template for a Foundry project.
+Unified interface for sending messages from Ethereum to other chains and rollups.
+
+It is essentially a quality-of-life wrapper around official bridges to make the developer experience simpler while maintaining the same security assumptions as the official bridges. This makes it much more secure than "omnichain" solutions like LayerZero, at least for rollups like Arbitrum and Optimism where the official bridge has the same security assumptions as the network itself. Of course, the Universal bridge only supports one-way messaging from Ethereum to other networks, so it is less capable than "omnichain" solutions, but it is still useful for use cases like cross-chain governance.
+
+This bridge is immutable, so other contracts using it should have the ability to update the bridge address in order to upgrade to newer versions of the bridge in the future and support more chains.
+
+## Supported chains
+
+- Arbitrum
+- Optimism
+- Polygon
+- Binance Smart Chain
+- Gnosis Chain
+
+## Usage
+
+Sending a message is as easy as:
+
+```solidity
+uint256 requiredValue = bridge.getRequiredMessageValue(bridge.CHAINID_ARBITRUM(), data.length, gasLimit);
+bridge.sendMessage{value: requiredValue}(bridge.CHAINID_ARBITRUM(), recipient, data, gasLimit);
+```
+
+Contracts on the receiving end of the message should have cross-chain support, which can be done by inheriting from the corresponding [OpenZeppelin Cross Chain Awareness](https://docs.openzeppelin.com/contracts/4.x/api/crosschain) specialization contract.
 
 ## Installation
 
-To install with [DappTools](https://github.com/dapphub/dapptools):
+To install with [Foundry](https://github.com/foundry-rs/foundry):
 
 ```
-dapp install [user]/[repo]
-```
-
-To install with [Foundry](https://github.com/gakonst/foundry):
-
-```
-forge install [user]/[repo]
+forge install zeframlou/universal-bridge
 ```
 
 ## Local development
 
-This project uses [Foundry](https://github.com/gakonst/foundry) as the development framework.
+This project uses [Foundry](https://github.com/foundry-rs/foundry) as the development framework.
 
 ### Dependencies
 
@@ -35,7 +52,7 @@ forge build
 ### Testing
 
 ```
-forge test
+forge test -f mainnet
 ```
 
 ### Contract deployment
