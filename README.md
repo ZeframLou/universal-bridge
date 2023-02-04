@@ -6,6 +6,8 @@ It is essentially a quality-of-life wrapper around official bridges to make the 
 
 This bridge is immutable, so other contracts using it should have the ability to update the bridge address in order to upgrade to newer versions of the bridge in the future and support more chains.
 
+The Universal bridge has been deployed to Ethereum Mainnet at [0xeb3113E09e1eDb7da11c1228F3A0c4919Ee0f6dE](https://etherscan.io/address/0xeb3113e09e1edb7da11c1228f3a0c4919ee0f6de#code).
+
 ## Supported chains
 
 - Arbitrum
