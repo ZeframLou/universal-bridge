@@ -42,7 +42,12 @@ contract UniversalBridge is IUniversalBridge {
     error UniversalBridge__MsgValueNotSupported();
 
     /// @inheritdoc IUniversalBridge
-    function sendMessage(uint256 chainId, address recipient, bytes calldata data, uint256 gasLimit) external payable {
+    function sendMessage(uint256 chainId, address recipient, bytes calldata data, uint256 gasLimit)
+        external
+        payable
+        virtual
+        override
+    {
         _sendMessage(chainId, recipient, data, gasLimit, DEFAULT_MAX_FEE_PER_GAS);
     }
 
@@ -53,7 +58,7 @@ contract UniversalBridge is IUniversalBridge {
         bytes calldata data,
         uint256 gasLimit,
         uint256 maxFeePerGas
-    ) external payable {
+    ) external payable virtual override {
         _sendMessage(chainId, recipient, data, gasLimit, maxFeePerGas);
     }
 
@@ -61,6 +66,7 @@ contract UniversalBridge is IUniversalBridge {
     function getRequiredMessageValue(uint256 chainId, uint256 dataLength, uint256 gasLimit)
         external
         view
+        virtual
         override
         returns (uint256)
     {
@@ -71,6 +77,7 @@ contract UniversalBridge is IUniversalBridge {
     function getRequiredMessageValue(uint256 chainId, uint256 dataLength, uint256 gasLimit, uint256 maxFeePerGas)
         external
         view
+        virtual
         override
         returns (uint256)
     {
@@ -87,7 +94,7 @@ contract UniversalBridge is IUniversalBridge {
         bytes calldata data,
         uint256 gasLimit,
         uint256 maxFeePerGas
-    ) internal {
+    ) internal virtual {
         if (chainId == CHAINID_ARBITRUM) _sendMessageArbitrum(recipient, data, gasLimit, maxFeePerGas);
         else if (chainId == CHAINID_OPTIMISM) _sendMessageOptimism(recipient, data, gasLimit);
         else if (chainId == CHAINID_POLYGON) _sendMessagePolygon(recipient, data);
@@ -99,6 +106,7 @@ contract UniversalBridge is IUniversalBridge {
     function _getRequiredMessageValue(uint256 chainId, uint256 dataLength, uint256 gasLimit, uint256 maxFeePerGas)
         internal
         view
+        virtual
         returns (uint256)
     {
         if (chainId != CHAINID_ARBITRUM) {
@@ -111,6 +119,7 @@ contract UniversalBridge is IUniversalBridge {
 
     function _sendMessageArbitrum(address recipient, bytes calldata data, uint256 gasLimit, uint256 maxFeePerGas)
         internal
+        virtual
     {
         uint256 submissionCost = BRIDGE_ARBITRUM.calculateRetryableSubmissionFee(data.length, block.basefee);
         uint256 l2CallValue = msg.value - submissionCost - gasLimit * maxFeePerGas;
@@ -119,19 +128,20 @@ contract UniversalBridge is IUniversalBridge {
         );
     }
 
-    function _sendMessageOptimism(address recipient, bytes calldata data, uint256 gasLimit) internal {
+    function _sendMessageOptimism(address recipient, bytes calldata data, uint256 gasLimit) internal virtual {
         if (msg.value != 0) revert UniversalBridge__MsgValueNotSupported();
         if (gasLimit > type(uint32).max) revert UniversalBridge__GasLimitTooLarge();
         BRIDGE_OPTIMISM.sendMessage(recipient, data, uint32(gasLimit));
     }
 
-    function _sendMessagePolygon(address recipient, bytes calldata data) internal {
+    function _sendMessagePolygon(address recipient, bytes calldata data) internal virtual {
         if (msg.value != 0) revert UniversalBridge__MsgValueNotSupported();
         BRIDGE_POLYGON.sendMessageToChild(recipient, data);
     }
 
     function _sendMessageAMB(ArbitraryMessageBridge bridge, address recipient, bytes calldata data, uint256 gasLimit)
         internal
+        virtual
     {
         if (msg.value != 0) revert UniversalBridge__MsgValueNotSupported();
         if (gasLimit > bridge.maxGasPerTx()) revert UniversalBridge__GasLimitTooLarge();
